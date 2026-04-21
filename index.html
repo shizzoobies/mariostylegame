@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mosslight Run</title>
+    <link rel="icon" href="assets/ui/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-panel">
+        <div class="hero-copy">
+          <p class="eyebrow">Original retro platformer</p>
+          <h1>Mosslight Run</h1>
+          <p class="hero-text">
+            Help Pip the courier relight three hillside beacons by sprinting
+            across mossy ruins, leaping over bramble pits, and outsmarting
+            stubborn beetles. It carries the bright, side-scrolling energy of
+            classic 8-bit platformers while keeping every character, item, and
+            location original.
+          </p>
+          <div class="action-row">
+            <button id="start-button" class="button primary" type="button">
+              Start Adventure
+            </button>
+            <button id="pause-button" class="button secondary" type="button">
+              Pause
+            </button>
+            <button id="mute-button" class="button secondary" type="button">
+              Sound: On
+            </button>
+          </div>
+          <p id="status-banner" class="status-banner">
+            Title screen ready. Press Start Adventure or hit Enter.
+          </p>
+        </div>
+        <div class="art-card">
+          <img
+            src="assets/ui/mosslight-run-title.png"
+            alt="Mosslight Run title illustration"
+          />
+        </div>
+      </section>
+
+      <section class="game-card">
+        <header class="hud-grid">
+          <div class="stat-card">
+            <span class="label">Stage</span>
+            <strong id="level-name">Sunpetal Path</strong>
+          </div>
+          <div class="stat-card">
+            <span class="label">Score</span>
+            <strong id="score">000000</strong>
+          </div>
+          <div class="stat-card">
+            <span class="label">Glimmers</span>
+            <strong id="glimmers">0 / 0</strong>
+          </div>
+          <div class="stat-card">
+            <span class="label">Mosslights</span>
+            <strong id="hearts">3</strong>
+          </div>
+          <div class="stat-card">
+            <span class="label">Timer</span>
+            <strong id="timer">95</strong>
+          </div>
+        </header>
+
+        <div class="canvas-frame">
+          <canvas
+            id="game"
+            width="960"
+            height="540"
+            tabindex="0"
+            aria-label="Mosslight Run platformer game canvas"
+          ></canvas>
+        </div>
+
+        <div class="touch-controls" aria-label="Touch controls">
+          <button
+            class="touch-button"
+            type="button"
+            data-control="left"
+            aria-label="Move left"
+          >
+            LEFT
+          </button>
+          <button
+            class="touch-button"
+            type="button"
+            data-control="right"
+            aria-label="Move right"
+          >
+            RIGHT
+          </button>
+          <button
+            class="touch-button jump"
+            type="button"
+            data-control="jump"
+            aria-label="Jump"
+          >
+            JUMP
+          </button>
+        </div>
+      </section>
+
+      <section class="notes-panel">
+        <div>
+          <h2>Controls</h2>
+          <p>
+            Move with Arrow keys or <kbd>A</kbd>/<kbd>D</kbd>, jump with
+            <kbd>Space</kbd>, <kbd>W</kbd>, or <kbd>Arrow Up</kbd>, pause with
+            <kbd>Esc</kbd> or <kbd>P</kbd>, and restart with <kbd>R</kbd>.
+          </p>
+        </div>
+        <div>
+          <h2>Audio &amp; art</h2>
+          <p>
+            Title illustration is original. In-game sprites are custom SVG
+            assets made for this project, and the sound effects come from
+            Kenney's CC0 audio packs.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="src/game.js"></script>
+  </body>
+</html>

@@ -1,0 +1,346 @@
+# Mosslight Run
+
+`Mosslight Run` is a small original browser platformer built with plain
+HTML/CSS/JS and rendered on a canvas. It aims for bright, old-school console
+energy without borrowing protected Nintendo characters, names, or assets.
+
+## What's inside
+
+- 3 handcrafted stages with rising difficulty
+- Smooth side-scrolling camera and layered parallax backgrounds
+- Original in-project SVG sprite art for Pip, beetles, glimmers, and beacon banners
+- Title illustration generated for this project and bundled locally
+- Score, timer, hearts, level restart flow, pause, and victory/game-over states
+- Mobile touch controls plus keyboard support
+- CC0 sound effects from Kenney's Interface Sounds and Impact Sounds packs
+
+## Run locally
+
+Most browsers handle image and audio loading more reliably from a small local
+server than from `file://`.
+
+### Python
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+## Controls
+
+- Move: Arrow keys or `A` / `D`
+- Jump: `Space`, `W`, or `Arrow Up`
+- Pause: `Esc` or `P`
+- Restart current level: `R`
+- Start / continue: `Enter`
+
+## Credits
+
+- Title illustration: generated for this project with Codex image generation
+- Sound effects: Kenney, CC0
+  - `assets/audio/LICENSE-kenney-interface.txt`
+  - `assets/audio/LICENSE-kenney-impact.txt`
+
+## Project structure
+
+```text
+original-platformer-codex-starter/
+  index.html
+  style.css
+  src/
+    game.js
+    levels.js
+  assets/
+    audio/
+    sprites/
+    ui/
+```
+*** Add File: D:\Codex\Mario Style Game\original-platformer-codex-starter\src\levels.js
+export const LEVELS = [
+  {
+    id: "sunpetal-path",
+    name: "Sunpetal Path",
+    width: 3360,
+    timeLimit: 95,
+    theme: {
+      skyTop: "#6fd5ff",
+      skyBottom: "#fff3b0",
+      cloud: "#fff7db",
+      farHill: "#9fd5a8",
+      midHill: "#70b07f",
+      nearHill: "#4e8f67",
+      stoneTop: "#8cc756",
+      stoneFace: "#876347",
+      stoneShadow: "#5c4030",
+      flower: "#f6bd45",
+      beacon: "#ffe98d",
+      haze: "rgba(255, 245, 220, 0.42)",
+    },
+    playerStart: { x: 96, y: 360 },
+    goal: { x: 3240, y: 348, w: 68, h: 122 },
+    platforms: [
+      { x: 0, y: 470, w: 640, h: 70, style: "ground" },
+      { x: 720, y: 470, w: 460, h: 70, style: "ground" },
+      { x: 1240, y: 470, w: 380, h: 70, style: "ground" },
+      { x: 1750, y: 470, w: 540, h: 70, style: "ground" },
+      { x: 2390, y: 470, w: 430, h: 70, style: "ground" },
+      { x: 2910, y: 470, w: 450, h: 70, style: "ground" },
+      { x: 520, y: 408, w: 128, h: 24, style: "ledge" },
+      { x: 874, y: 390, w: 156, h: 24, style: "ledge" },
+      { x: 1040, y: 332, w: 124, h: 24, style: "ledge" },
+      { x: 1384, y: 398, w: 126, h: 24, style: "ledge" },
+      { x: 1642, y: 352, w: 148, h: 24, style: "ledge" },
+      { x: 2000, y: 392, w: 146, h: 24, style: "ledge" },
+      { x: 2286, y: 330, w: 124, h: 24, style: "ledge" },
+      { x: 2576, y: 392, w: 118, h: 24, style: "ledge" },
+      { x: 2790, y: 330, w: 148, h: 24, style: "ledge" },
+    ],
+    movingPlatforms: [],
+    collectibles: [
+      { x: 560, y: 368 },
+      { x: 918, y: 348 },
+      { x: 1090, y: 286 },
+      { x: 1438, y: 356 },
+      { x: 1708, y: 308 },
+      { x: 2056, y: 350 },
+      { x: 2348, y: 288 },
+      { x: 2632, y: 348 },
+      { x: 2860, y: 286 },
+      { x: 3140, y: 420 },
+    ],
+    enemies: [
+      { x: 854, y: 438, w: 44, h: 32, minX: 780, maxX: 1100, speed: 64 },
+      { x: 1498, y: 438, w: 44, h: 32, minX: 1280, maxX: 1568, speed: 70 },
+      { x: 2140, y: 438, w: 44, h: 32, minX: 1840, maxX: 2238, speed: 76 },
+      { x: 3010, y: 438, w: 44, h: 32, minX: 2940, maxX: 3260, speed: 84 },
+    ],
+    hazards: [
+      { x: 1640, y: 512, w: 88, h: 22 },
+      { x: 2838, y: 512, w: 68, h: 22 },
+    ],
+  },
+  {
+    id: "stonewind-steps",
+    name: "Stonewind Steps",
+    width: 3700,
+    timeLimit: 105,
+    theme: {
+      skyTop: "#67b8ff",
+      skyBottom: "#f7ecd0",
+      cloud: "#fffdf2",
+      farHill: "#b3d0c2",
+      midHill: "#7fb499",
+      nearHill: "#5b8f76",
+      stoneTop: "#cbd66b",
+      stoneFace: "#796856",
+      stoneShadow: "#52463b",
+      flower: "#f0d483",
+      beacon: "#fff3ad",
+      haze: "rgba(249, 239, 214, 0.34)",
+    },
+    playerStart: { x: 100, y: 360 },
+    goal: { x: 3574, y: 316, w: 72, h: 154 },
+    platforms: [
+      { x: 0, y: 470, w: 492, h: 70, style: "ground" },
+      { x: 560, y: 470, w: 308, h: 70, style: "ground" },
+      { x: 928, y: 470, w: 278, h: 70, style: "ground" },
+      { x: 1422, y: 470, w: 338, h: 70, style: "ground" },
+      { x: 1946, y: 470, w: 284, h: 70, style: "ground" },
+      { x: 2386, y: 470, w: 304, h: 70, style: "ground" },
+      { x: 2940, y: 470, w: 460, h: 70, style: "ground" },
+      { x: 426, y: 394, w: 132, h: 22, style: "ledge" },
+      { x: 742, y: 346, w: 146, h: 22, style: "ledge" },
+      { x: 1110, y: 374, w: 140, h: 22, style: "ledge" },
+      { x: 1268, y: 312, w: 106, h: 22, style: "ledge" },
+      { x: 1686, y: 356, w: 136, h: 22, style: "ledge" },
+      { x: 2220, y: 330, w: 132, h: 22, style: "ledge" },
+      { x: 2758, y: 356, w: 144, h: 22, style: "ledge" },
+      { x: 3342, y: 300, w: 176, h: 22, style: "ledge" },
+    ],
+    movingPlatforms: [
+      {
+        x: 1398,
+        y: 404,
+        w: 120,
+        h: 20,
+        style: "moving",
+        axis: "y",
+        range: 78,
+        speed: 1.3,
+        phase: 0.2,
+      },
+      {
+        x: 2500,
+        y: 380,
+        w: 128,
+        h: 20,
+        style: "moving",
+        axis: "x",
+        range: 110,
+        speed: 1.6,
+        phase: 2.2,
+      },
+      {
+        x: 3148,
+        y: 372,
+        w: 116,
+        h: 20,
+        style: "moving",
+        axis: "y",
+        range: 92,
+        speed: 1.15,
+        phase: 4.4,
+      },
+    ],
+    collectibles: [
+      { x: 470, y: 350 },
+      { x: 804, y: 300 },
+      { x: 1168, y: 330 },
+      { x: 1318, y: 268 },
+      { x: 1458, y: 286 },
+      { x: 1752, y: 312 },
+      { x: 2280, y: 286 },
+      { x: 2556, y: 322 },
+      { x: 2824, y: 312 },
+      { x: 3198, y: 280 },
+      { x: 3428, y: 256 },
+      { x: 3602, y: 270 },
+    ],
+    enemies: [
+      { x: 640, y: 438, w: 44, h: 32, minX: 590, maxX: 820, speed: 76 },
+      { x: 1514, y: 438, w: 44, h: 32, minX: 1460, maxX: 1716, speed: 72 },
+      { x: 2408, y: 438, w: 44, h: 32, minX: 2400, maxX: 2664, speed: 82 },
+      { x: 3020, y: 438, w: 44, h: 32, minX: 2974, maxX: 3374, speed: 92 },
+      { x: 3380, y: 268, w: 44, h: 32, minX: 3350, maxX: 3478, speed: 62 },
+    ],
+    hazards: [
+      { x: 1218, y: 512, w: 112, h: 22 },
+      { x: 1780, y: 512, w: 118, h: 22 },
+      { x: 2704, y: 512, w: 140, h: 22 },
+    ],
+  },
+  {
+    id: "towerroot-ascent",
+    name: "Towerroot Ascent",
+    width: 4140,
+    timeLimit: 120,
+    theme: {
+      skyTop: "#4bb6f2",
+      skyBottom: "#f6dfb2",
+      cloud: "#fff7e0",
+      farHill: "#98c9b7",
+      midHill: "#5f9d8b",
+      nearHill: "#447a69",
+      stoneTop: "#b4d05b",
+      stoneFace: "#6d564a",
+      stoneShadow: "#473731",
+      flower: "#ffd57b",
+      beacon: "#fff0a5",
+      haze: "rgba(255, 241, 207, 0.28)",
+    },
+    playerStart: { x: 100, y: 360 },
+    goal: { x: 3994, y: 242, w: 76, h: 228 },
+    platforms: [
+      { x: 0, y: 470, w: 520, h: 70, style: "ground" },
+      { x: 596, y: 470, w: 350, h: 70, style: "ground" },
+      { x: 1120, y: 470, w: 332, h: 70, style: "ground" },
+      { x: 1618, y: 470, w: 330, h: 70, style: "ground" },
+      { x: 2128, y: 470, w: 294, h: 70, style: "ground" },
+      { x: 2548, y: 470, w: 314, h: 70, style: "ground" },
+      { x: 3010, y: 470, w: 240, h: 70, style: "ground" },
+      { x: 3708, y: 470, w: 432, h: 70, style: "ground" },
+      { x: 404, y: 390, w: 130, h: 22, style: "ledge" },
+      { x: 780, y: 328, w: 132, h: 22, style: "ledge" },
+      { x: 950, y: 266, w: 120, h: 22, style: "ledge" },
+      { x: 1396, y: 370, w: 142, h: 22, style: "ledge" },
+      { x: 1844, y: 316, w: 136, h: 22, style: "ledge" },
+      { x: 2280, y: 260, w: 136, h: 22, style: "ledge" },
+      { x: 2788, y: 334, w: 146, h: 22, style: "ledge" },
+      { x: 3292, y: 286, w: 140, h: 22, style: "ledge" },
+      { x: 3572, y: 236, w: 132, h: 22, style: "ledge" },
+    ],
+    movingPlatforms: [
+      {
+        x: 560,
+        y: 352,
+        w: 116,
+        h: 20,
+        style: "moving",
+        axis: "y",
+        range: 86,
+        speed: 1.45,
+        phase: 1.1,
+      },
+      {
+        x: 1164,
+        y: 334,
+        w: 120,
+        h: 20,
+        style: "moving",
+        axis: "x",
+        range: 144,
+        speed: 1.25,
+        phase: 0.4,
+      },
+      {
+        x: 2480,
+        y: 304,
+        w: 118,
+        h: 20,
+        style: "moving",
+        axis: "y",
+        range: 104,
+        speed: 1.18,
+        phase: 5.2,
+      },
+      {
+        x: 3404,
+        y: 340,
+        w: 116,
+        h: 20,
+        style: "moving",
+        axis: "x",
+        range: 122,
+        speed: 1.55,
+        phase: 2.8,
+      },
+    ],
+    collectibles: [
+      { x: 448, y: 348 },
+      { x: 618, y: 254 },
+      { x: 844, y: 284 },
+      { x: 1010, y: 222 },
+      { x: 1226, y: 284 },
+      { x: 1466, y: 326 },
+      { x: 1910, y: 274 },
+      { x: 2348, y: 218 },
+      { x: 2538, y: 184 },
+      { x: 2864, y: 290 },
+      { x: 3360, y: 242 },
+      { x: 3632, y: 194 },
+      { x: 3838, y: 356 },
+      { x: 3994, y: 182 },
+    ],
+    enemies: [
+      { x: 708, y: 438, w: 44, h: 32, minX: 620, maxX: 918, speed: 82 },
+      { x: 1180, y: 438, w: 44, h: 32, minX: 1140, maxX: 1416, speed: 86 },
+      { x: 1670, y: 438, w: 44, h: 32, minX: 1644, maxX: 1902, speed: 92 },
+      { x: 2590, y: 438, w: 44, h: 32, minX: 2570, maxX: 2822, speed: 88 },
+      { x: 3078, y: 438, w: 44, h: 32, minX: 3034, maxX: 3216, speed: 96 },
+      { x: 3598, y: 204, w: 44, h: 32, minX: 3578, maxX: 3678, speed: 68 },
+    ],
+    hazards: [
+      { x: 518, y: 512, w: 66, h: 22 },
+      { x: 1464, y: 512, w: 118, h: 22 },
+      { x: 1958, y: 512, w: 146, h: 22 },
+      { x: 2868, y: 512, w: 132, h: 22 },
+      { x: 3260, y: 512, w: 420, h: 22 },
+    ],
+  },
+];
+
+export const TOTAL_GLIMMERS = LEVELS.reduce(
+  (sum, level) => sum + level.collectibles.length,
+  0,
+);
