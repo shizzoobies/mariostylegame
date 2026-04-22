@@ -11,6 +11,7 @@ const PHYSICS = {
   groundDrag: 3200,
   airDrag: 720,
   jumpSpeed: 690,
+  doubleJumpSpeed: 650,
   coyoteTime: 0.12,
   jumpBuffer: 0.14,
   maxFall: 930,
@@ -261,7 +262,10 @@ function cloneLevel(def) {
     collectibles: def.collectibles.map((collectible, index) => ({
       ...collectible,
       collected: false,
+      hidden: Boolean(collectible.hidden),
+      revealed: !collectible.hidden,
       phase: index * 0.8,
+      value: collectible.value ?? 100,
     })),
     enemies: def.enemies.map((enemy, index) => ({
       ...enemy,
@@ -289,6 +293,7 @@ function createPlayer(start) {
     onPlatform: null,
     coyoteTimer: 0,
     jumpBufferTimer: 0,
+    airJumpsLeft: 1,
     invulnTimer: 0,
     animationTime: 0,
     landCooldown: 0,
@@ -306,7 +311,7 @@ function showTitleState() {
   state.totalCollected = 0;
   state.hearts = 3;
   state.particles = [];
-  setStatus("Title screen ready. Press Start Adventure or hit Enter.");
+  setStatus("Title screen ready. Press Start Adventure or hit Enter, then try the new double jump.");
   updateHud();
   updateButtons();
 }
@@ -317,7 +322,7 @@ function startCampaign() {
   state.hearts = 3;
   loadLevel(0, {
     playCue: true,
-    announce: "Sunpetal Path begins. Relight the first beacon.",
+    announce: "Sunpetal Path begins. Double-jump high and watch for hidden glimmer caches.",
   });
 }
 
@@ -547,19 +552,9 @@ function updatePlayer(dt) {
   }
 
   if (player.jumpBufferTimer > 0 && player.coyoteTimer > 0) {
-    player.vy = -PHYSICS.jumpSpeed;
-    player.grounded = false;
-    player.coyoteTimer = 0;
-    player.jumpBufferTimer = 0;
-    player.onPlatform = null;
-    playSound("jump");
-    spawnBurst(player.x + player.w / 2, player.y + player.h, {
-      colors: ["#fff0b2", "#b3d67f", "#9d7d5f"],
-      count: 6,
-      speed: 90,
-      gravity: 340,
-      size: 5,
-    });
+    performJump(player, "ground");
+  } else if (triggers.jumpPressed && !wasGrounded && player.airJumpsLeft > 0) {
+    performJump(player, "double");
   }
 
   if (!input.jumpHeld && player.vy < -210) {
@@ -611,6 +606,29 @@ function updatePlayer(dt) {
   }
 }
 
+function performJump(player, type) {
+  const isDoubleJump = type === "double";
+  player.vy = -(isDoubleJump ? PHYSICS.doubleJumpSpeed : PHYSICS.jumpSpeed);
+  player.grounded = false;
+  player.coyoteTimer = 0;
+  player.jumpBufferTimer = 0;
+  player.onPlatform = null;
+  if (isDoubleJump) {
+    player.airJumpsLeft = Math.max(0, player.airJumpsLeft - 1);
+  }
+
+  playSound("jump", { rate: isDoubleJump ? 1.14 : 1 });
+  spawnBurst(player.x + player.w / 2, player.y + player.h, {
+    colors: isDoubleJump
+      ? ["#d5f4ff", "#fff1a0", "#88cde2"]
+      : ["#fff0b2", "#b3d67f", "#9d7d5f"],
+    count: isDoubleJump ? 8 : 6,
+    speed: isDoubleJump ? 118 : 90,
+    gravity: isDoubleJump ? 280 : 340,
+    size: isDoubleJump ? 6 : 5,
+  });
+}
+
 function resolveHorizontal(player, solids) {
   for (const solid of solids) {
     if (!rectsIntersect(player, solid)) continue;
@@ -637,6 +655,7 @@ function resolveVertical(player, solids, landingSpeed, wasGrounded) {
       player.vy = 0;
       player.grounded = true;
       player.onPlatform = solid;
+      player.airJumpsLeft = 1;
 
       if (!wasGrounded) {
         spawnBurst(player.x + player.w / 2, player.y + player.h, {
@@ -704,6 +723,7 @@ function updateEnemies(dt, collideWithPlayer) {
       player.vy = -PHYSICS.stompBounce;
       player.grounded = false;
       player.onPlatform = null;
+      player.airJumpsLeft = 1;
       state.score += 250;
       playSound("stomp");
       spawnBurst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, {
@@ -733,9 +753,32 @@ function updateCollectibles() {
     if (collectible.collected) continue;
 
     const bob = Math.sin(state.ambientTime * 4 + collectible.phase) * 4;
+    const centerY = collectible.y + bob;
+
+    if (collectible.hidden && !collectible.revealed) {
+      const closeEnough =
+        Math.abs(player.x + player.w / 2 - collectible.x) < 82 &&
+        Math.abs(player.y + player.h / 2 - centerY) < 72;
+
+      if (closeEnough) {
+        collectible.revealed = true;
+        playSound("menuSelect", { volume: 0.72, rate: 1.08 });
+        spawnBurst(collectible.x, centerY, {
+          colors: ["#fff5b1", "#ffd973", "#b8f5f0"],
+          count: 7,
+          speed: 95,
+          gravity: 280,
+          size: 4,
+        });
+        setStatus("A hidden glimmer cache shimmered into view.");
+      } else {
+        continue;
+      }
+    }
+
     const bounds = {
       x: collectible.x - 14,
-      y: collectible.y + bob - 14,
+      y: centerY - 14,
       w: 28,
       h: 28,
     };
@@ -743,15 +786,21 @@ function updateCollectibles() {
     if (rectsIntersect(pickupHitbox, bounds)) {
       collectible.collected = true;
       state.totalCollected += 1;
-      state.score += 100;
-      playSound("coin");
-      spawnBurst(collectible.x, collectible.y + bob, {
-        colors: ["#fff3a8", "#ffc94f", "#f28c2b"],
+      state.score += collectible.value;
+      playSound("coin", { rate: collectible.hidden ? 0.92 : 1 });
+      spawnBurst(collectible.x, centerY, {
+        colors: collectible.hidden
+          ? ["#fff7c4", "#8de0e8", "#f3be57"]
+          : ["#fff3a8", "#ffc94f", "#f28c2b"],
         count: 9,
         speed: 130,
         gravity: 420,
         size: 4,
       });
+
+      if (collectible.hidden) {
+        setStatus(`Hidden cache found. +${collectible.value} score.`);
+      }
     }
   }
 }
@@ -955,27 +1004,40 @@ function drawPlatforms() {
     const screenX = Math.round(platform.x - state.cameraX);
     if (screenX + platform.w < -60 || screenX > GAME_WIDTH + 60) continue;
 
+    const isSecret = platform.style === "secret";
     const topHeight = platform.style === "ground" ? 15 : 10;
+    const faceColor = isSecret ? shadeColor(theme.stoneFace, 22) : theme.stoneFace;
+    const shadowColor = isSecret ? shadeColor(theme.stoneShadow, 12) : theme.stoneShadow;
+    const topColor = isSecret ? shadeColor(theme.stoneTop, 16) : theme.stoneTop;
 
-    ctx.fillStyle = theme.stoneFace;
+    ctx.fillStyle = faceColor;
     ctx.fillRect(screenX, platform.y + topHeight, platform.w, platform.h - topHeight);
 
-    ctx.fillStyle = theme.stoneShadow;
+    ctx.fillStyle = shadowColor;
     ctx.fillRect(screenX, platform.y + topHeight, platform.w, Math.max(4, platform.h - topHeight));
 
     for (let x = 0; x < platform.w; x += 24) {
       const width = Math.min(18, platform.w - x - 4);
       if (width <= 0) continue;
-      ctx.fillStyle = x % 48 === 0 ? theme.stoneFace : shadeColor(theme.stoneFace, -8);
+      ctx.fillStyle = x % 48 === 0 ? faceColor : shadeColor(theme.stoneFace, isSecret ? 8 : -8);
       ctx.fillRect(screenX + x + 3, platform.y + topHeight + 4, width, Math.max(6, platform.h - topHeight - 10));
     }
 
-    ctx.fillStyle = theme.stoneTop;
+    ctx.fillStyle = topColor;
     ctx.fillRect(screenX, platform.y, platform.w, topHeight);
 
     for (let x = 0; x < platform.w; x += 14) {
       const bladeHeight = 4 + (x % 4);
       ctx.fillRect(screenX + x, platform.y - bladeHeight + 2, 6, bladeHeight);
+    }
+
+    if (isSecret) {
+      ctx.fillStyle = "rgba(255, 244, 176, 0.38)";
+      ctx.fillRect(screenX + 8, platform.y + platform.h - 5, platform.w - 16, 3);
+      ctx.fillStyle = withAlpha(theme.flower, 0.7);
+      for (let x = 10; x < platform.w - 10; x += 22) {
+        ctx.fillRect(screenX + x, platform.y + 3, 4, 4);
+      }
     }
 
     if (platform.style === "moving") {
@@ -1034,6 +1096,14 @@ function drawCollectibles() {
     const shimmer = 0.9 + Math.abs(Math.sin(state.ambientTime * 8 + collectible.phase)) * 0.18;
 
     if (x < -30 || x > GAME_WIDTH + 30) continue;
+
+    if (collectible.hidden && !collectible.revealed) {
+      const twinkle = 0.14 + Math.abs(Math.sin(state.ambientTime * 9 + collectible.phase)) * 0.16;
+      ctx.fillStyle = `rgba(255, 248, 215, ${twinkle})`;
+      ctx.fillRect(x - 1, y - 6, 3, 12);
+      ctx.fillRect(x - 6, y - 1, 12, 3);
+      continue;
+    }
 
     ctx.fillStyle = "rgba(255, 239, 166, 0.22)";
     ctx.beginPath();
@@ -1124,7 +1194,7 @@ function drawOverlay() {
   };
 
   const bodyByPhase = {
-    title: "Sprint through three original retro stages and relight every hillside beacon.",
+    title: "Sprint through three original retro stages, chain a midair second jump, and sniff out hidden glimmer caches.",
     paused: "Take a breath. Pip will hold the trail right here.",
     respawning: "The path resets, but your progress through the adventure stays alive.",
     intermission: "The next beacon waits beyond a harder climb.",
