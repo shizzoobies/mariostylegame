@@ -33,6 +33,9 @@ const dom = {
   hearts: document.getElementById("hearts"),
   timer: document.getElementById("timer"),
   touchButtons: document.querySelectorAll("[data-control]"),
+  touchJoystick: document.getElementById("touch-joystick"),
+  touchStickBase: document.getElementById("touch-stick-base"),
+  touchStickKnob: document.getElementById("touch-stick-knob"),
 };
 
 const spritePaths = {
@@ -64,6 +67,7 @@ const input = {
   left: false,
   right: false,
   jumpHeld: false,
+  moveAxis: 0,
 };
 
 const triggers = {
@@ -90,6 +94,7 @@ const state = {
   levelEntryScore: 0,
   levelEntryGlimmers: 0,
   respawnTimer: 0,
+  activeStickPointerId: null,
 };
 
 preloadAssets();
@@ -146,9 +151,7 @@ function bindEvents() {
   });
 
   window.addEventListener("blur", () => {
-    input.left = false;
-    input.right = false;
-    input.jumpHeld = false;
+    resetTouchState();
     if (state.phase === "playing") {
       state.phase = "paused";
       setStatus("Paused while the window is unfocused.");
@@ -173,6 +176,14 @@ function bindEvents() {
 
   canvas.addEventListener("pointerdown", () => {
     registerInteraction();
+    if (
+      state.phase === "title" ||
+      state.phase === "intermission" ||
+      state.phase === "gameOver" ||
+      state.phase === "victory"
+    ) {
+      handleStartOrContinue();
+    }
     canvas.focus();
   });
 
@@ -181,18 +192,15 @@ function bindEvents() {
     const press = (event) => {
       event.preventDefault();
       registerInteraction();
-      if (control === "left") input.left = true;
-      if (control === "right") input.right = true;
       if (control === "jump") {
         if (!input.jumpHeld) triggers.jumpPressed = true;
         input.jumpHeld = true;
       }
+      if (control === "pause") togglePause();
     };
 
     const release = (event) => {
       event.preventDefault();
-      if (control === "left") input.left = false;
-      if (control === "right") input.right = false;
       if (control === "jump") input.jumpHeld = false;
     };
 
@@ -201,11 +209,71 @@ function bindEvents() {
     button.addEventListener("pointercancel", release);
     button.addEventListener("pointerleave", release);
   });
+
+  if (dom.touchJoystick) {
+    dom.touchJoystick.addEventListener("pointerdown", handleJoystickPointerDown);
+    dom.touchJoystick.addEventListener("pointermove", handleJoystickPointerMove);
+    dom.touchJoystick.addEventListener("pointerup", handleJoystickPointerEnd);
+    dom.touchJoystick.addEventListener("pointercancel", handleJoystickPointerEnd);
+    dom.touchJoystick.addEventListener("lostpointercapture", handleJoystickPointerEnd);
+  }
 }
 
 function registerInteraction() {
   state.audioReady = true;
   canvas.focus();
+}
+
+function resetTouchState() {
+  input.left = false;
+  input.right = false;
+  input.jumpHeld = false;
+  input.moveAxis = 0;
+  state.activeStickPointerId = null;
+  updateJoystickVisual(0, 0);
+}
+
+function handleJoystickPointerDown(event) {
+  event.preventDefault();
+  registerInteraction();
+  state.activeStickPointerId = event.pointerId;
+  dom.touchJoystick.setPointerCapture(event.pointerId);
+  updateJoystickFromPointer(event);
+}
+
+function handleJoystickPointerMove(event) {
+  if (state.activeStickPointerId !== event.pointerId) return;
+  event.preventDefault();
+  updateJoystickFromPointer(event);
+}
+
+function handleJoystickPointerEnd(event) {
+  if (state.activeStickPointerId !== event.pointerId) return;
+  event.preventDefault();
+  state.activeStickPointerId = null;
+  input.moveAxis = 0;
+  updateJoystickVisual(0, 0);
+}
+
+function updateJoystickFromPointer(event) {
+  const bounds = dom.touchStickBase.getBoundingClientRect();
+  const centerX = bounds.left + bounds.width / 2;
+  const centerY = bounds.top + bounds.height / 2;
+  const maxRadius = Math.max(22, Math.min(bounds.width, bounds.height) * 0.28);
+  const rawX = event.clientX - centerX;
+  const rawY = event.clientY - centerY;
+  const distance = Math.hypot(rawX, rawY);
+  const scale = distance > maxRadius ? maxRadius / distance : 1;
+  const stickX = rawX * scale;
+  const stickY = rawY * scale;
+
+  input.moveAxis = clamp(stickX / maxRadius, -1, 1);
+  updateJoystickVisual(stickX, stickY);
+}
+
+function updateJoystickVisual(x, y) {
+  if (!dom.touchStickKnob) return;
+  dom.touchStickKnob.style.transform = `translate(calc(-50% + ${Math.round(x)}px), calc(-50% + ${Math.round(y)}px))`;
 }
 
 function setStatus(message) {
@@ -541,9 +609,10 @@ function updatePlayer(dt) {
     ? PHYSICS.coyoteTime
     : Math.max(0, player.coyoteTimer - dt);
 
-  const direction = Number(input.right) - Number(input.left);
+  const buttonDirection = Number(input.right) - Number(input.left);
+  const direction = buttonDirection !== 0 ? buttonDirection : input.moveAxis;
   if (direction !== 0) {
-    player.facing = direction;
+    player.facing = direction > 0 ? 1 : -1;
     const acceleration = wasGrounded ? PHYSICS.groundAccel : PHYSICS.airAccel;
     player.vx = moveTowards(player.vx, direction * PHYSICS.maxRun, acceleration * dt);
   } else {

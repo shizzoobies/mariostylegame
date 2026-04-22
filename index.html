@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Mosslight Run</title>
     <link rel="icon" href="assets/ui/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="style.css" />
@@ -68,41 +71,45 @@
           </div>
         </header>
 
-        <div class="canvas-frame">
-          <canvas
-            id="game"
-            width="960"
-            height="540"
-            tabindex="0"
-            aria-label="Mosslight Run platformer game canvas"
-          ></canvas>
-        </div>
+        <div class="play-area">
+          <div class="canvas-frame">
+            <canvas
+              id="game"
+              width="960"
+              height="540"
+              tabindex="0"
+              aria-label="Mosslight Run platformer game canvas"
+            ></canvas>
+          </div>
 
-        <div class="touch-controls" aria-label="Touch controls">
-          <button
-            class="touch-button"
-            type="button"
-            data-control="left"
-            aria-label="Move left"
-          >
-            LEFT
-          </button>
-          <button
-            class="touch-button"
-            type="button"
-            data-control="right"
-            aria-label="Move right"
-          >
-            RIGHT
-          </button>
-          <button
-            class="touch-button jump"
-            type="button"
-            data-control="jump"
-            aria-label="Jump"
-          >
-            JUMP
-          </button>
+          <div class="touch-controls" aria-label="Touch controls">
+            <div class="touch-joystick" id="touch-joystick" aria-hidden="true">
+              <div class="touch-stick-base" id="touch-stick-base">
+                <div class="touch-stick-ring"></div>
+                <div class="touch-stick-knob" id="touch-stick-knob"></div>
+              </div>
+              <span class="touch-label">Move</span>
+            </div>
+
+            <div class="touch-actions">
+              <button
+                class="touch-button jump"
+                type="button"
+                data-control="jump"
+                aria-label="Jump"
+              >
+                JUMP
+              </button>
+              <button
+                class="touch-button utility"
+                type="button"
+                data-control="pause"
+                aria-label="Pause game"
+              >
+                PAUSE
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -113,7 +120,8 @@
             Move with Arrow keys or <kbd>A</kbd>/<kbd>D</kbd>, jump with
             <kbd>Space</kbd>, <kbd>W</kbd>, or <kbd>Arrow Up</kbd>, jump again
             once in midair for a double jump, pause with <kbd>Esc</kbd> or
-            <kbd>P</kbd>, and restart with <kbd>R</kbd>.
+            <kbd>P</kbd>, and restart with <kbd>R</kbd>. On mobile, drag the
+            thumbpad to run and tap the large jump button.
           </p>
         </div>
         <div>
